@@ -21,14 +21,14 @@ Domain domains[2]; // Array of domains
 
 // Global variables representing critical domain quantities' 
 // version differences between parent and child
-byte cq_elevation = 0;
-byte cq_wetdry = 0;
-byte cq_velocity = 0;
-byte cq_wind = 0;
+byte eta = 0;	// elevations
+byte wd = 0;	// wet/dry states
+byte v = 0;	// velocities
+byte tau = 0;	// wind parameters
 
 // Modify operator for critical domain quantities
-inline modify(var){
-  printf("modifying\n")
+inline write(var){
+  printf("writing\n")
   if
   :: isParent() -> var++;
   :: else -> var--;
@@ -135,30 +135,30 @@ inline phase_notify(domain,i){
 inline exec_routine(i){
   if
   :: i==0 -> // Routine 0: Timestep initialization
-      modify(cq_wind);
-      copy(cq_wind,0);
-      copy(cq_elevation,0);
-      copy(cq_velocity,0);
+      write(tau);
+      copy(tau,0);
+      copy(eta,0);
+      copy(v,0);
 
   :: i==1 -> // Routine 1: GWCE Assembly
       skip;
 
   :: i==2 -> // Routine 2: GWCE Solver
-      modify(cq_elevation);
-      copy(cq_elevation,0);
+      write(eta);
+      copy(eta,0);
 
   :: i==3 -> // Routine 3: Wet/Dry Algm (1st half)
-      modify(cq_elevation);
-      modify(cq_wetdry);
-      copy(cq_wetdry,1);
+      write(eta);
+      write(wd);
+      copy(wd,1);
 
   :: i==4 -> // Routine 4: Wet/Dry Algm (2nd half)
-      modify(cq_wetdry);
-      copy(cq_wetdry,0);
+      write(wd);
+      copy(wd,0);
 
   :: i==5 -> // Routine 5: Momentum Eqns Solver
-      modify(cq_velocity);
-      copy(cq_velocity,0);
+      write(v);
+      copy(v,0);
   fi
 }
 
